@@ -48,6 +48,14 @@ async function createTables() {
                 content TEXT NOT NULL,
                 active BOOLEAN DEFAULT true
             );
+            CREATE TABLE tags (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) UNIQUE NOT NULL
+            );
+            CREATE TABLE post_tags (
+                "postId" INTEGER REFERENCES posts(id),
+                "tagId" INTEGER REFERENCES tags(id)
+            );
         `);
         console.log("Finished building tables.");
     } catch (error) {
@@ -64,7 +72,7 @@ async function createInitialUsers() {
         const sandra = await createUser({ username: 'sandra', password: 'imposter_albert', name: 'Just Sandra', location: 'Not tellin' });
         const glamgal = await createUser({ username: 'glamgal', password: 'somethingwitty', name: 'Joshua', location: 'Upper East Side' });
 
-        console.log(albert);
+        console.log(albert, sandra, glamgal);
 
         console.log("Finished creating users!");
     } catch (error) {
@@ -95,6 +103,7 @@ async function rebuildDB() {
         await dropTables();
         await createTables();
         await createInitialUsers();
+        await createInitialPosts();
     } catch (error) {
         console.error(error);
     }

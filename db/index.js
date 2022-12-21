@@ -47,7 +47,7 @@ async function createPost({
     content}) {
     try {
         const { rows } = await client.query(`
-            INSERT INTO posts(authorId, title, content)
+            INSERT INTO posts("authorId", title, content)
             VALUES ($1, $2, $3)
             RETURNING *;
         `, [authorId, title, content]);
@@ -83,13 +83,7 @@ async function updateUser(id, fields = {}) {
     }
 }
 
-// ------------------------------------------------------Don't know if this works--------------------------------------------------
-async function updatePost(id, fields = {
-    title,
-    content,
-    active
-}) {
-    // build the set string
+async function updatePost(id, fields = {}) {
     const setString = Object.keys(fields).map(
         (key, index) => `"${ key }"=$${ index + 1 }`
     ).join(', ');
@@ -98,21 +92,19 @@ async function updatePost(id, fields = {
     if (setString.length === 0) {
         return;
     }
-    
     try {
-        const { rows: [ user ] } = await client.query(`
+        const { rows: [ post ] } = await client.query(`
         UPDATE posts
         SET ${ setString }
-        WHERE id=${ id }
+        WHERE id = ${ id }
         RETURNING *;
         `, Object.values(fields));
 
-        return user;
+        return post;
     } catch (error) {
         throw error;
     }
 }
-// --------------------------------------------------------------------------------------------------------------------------------
 
 async function getPostsByUser(userId) {
     try {
@@ -132,19 +124,16 @@ async function getUserById(userId) {
     
     try {
         const { rows: [user] } = await client.query(`
-            SELECT * FROM users
+            SELECT id, username, name, location, active
+            FROM users
             WHERE id=${userId};
         `);
 
-        if (rows.length === 0) {
+        if (!user) {
             return null;
         }
-
-        const { mows } = getPostsByUser(userId);
-
-        user.push(mows);
-
-        delete user[2];
+        
+        user.posts = await getPostsByUser(userId);
 
         return user;
     } catch (error) {
