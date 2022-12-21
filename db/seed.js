@@ -8,7 +8,9 @@ const {
     updatePost,
     getAllPosts,
     getPostsByUser,
-    getUserById
+    getUserById,
+    createTags,
+    addTagsToPost
 } = require('./index');
 
 // this function should call a query which drops all tables from our database
@@ -17,6 +19,8 @@ async function dropTables() {
         console.log("Starting to drop tables...");
 
         await client.query(`
+            DROP TABLE IF EXISTS post_tags;
+            DROP TABLE IF EXISTS tags;
             DROP TABLE IF EXISTS posts;
             DROP TABLE IF EXISTS users;
         `);
@@ -90,7 +94,44 @@ async function createInitialPosts() {
             title: "FirstPost",
             content: "This is my first post. I hope I love writing blogs as much as I love reading them."
         });
+
+        await createPost({
+            authorId: sandra.id,
+            title: "SecondPost",
+            content: "Lorem ipsum is for suckers."
+        });
+
+        await createPost({
+            authorId: glamgal.id,
+            title: "FirstPost",
+            content: "Boy i sure do love lorem ipsum."
+        });
     } catch (error) {
+        throw error;
+    }
+}
+
+async function createInitialTags() {
+    try {
+        console.log("Starting to create tags!");
+
+        const [happy, sad, inspo, catman, foolish] = await createTags([
+            '#happy',
+            '#worst-day-ever',
+            '#youcandopanything',
+            '#catmandoeverything',
+            '#onesockatatime'
+        ]);
+
+        const [postOne, postTwo, postThree] = await getAllPosts();
+
+        await addTagsToPost(postOne.id, [happy, inspo]);
+        await addTagsToPost(postTwo.id, [sad, inspo, foolish]);
+        await addTagsToPost(postThree.id, [happy, catman, inspo]);
+
+        console.log("Finished creating tags!");
+    } catch (error) {
+        console.log("Error creating tags!");
         throw error;
     }
 }
@@ -104,6 +145,7 @@ async function rebuildDB() {
         await createTables();
         await createInitialUsers();
         await createInitialPosts();
+        await createInitialTags();
     } catch (error) {
         console.error(error);
     }
