@@ -58,7 +58,8 @@ async function createTables() {
             );
             CREATE TABLE post_tags (
                 "postId" INTEGER REFERENCES posts(id),
-                "tagId" INTEGER REFERENCES tags(id)
+                "tagId" INTEGER REFERENCES tags(id),
+                UNIQUE ("postId", "tagId")
             );
         `);
         console.log("Finished building tables.");
@@ -103,7 +104,7 @@ async function createInitialPosts() {
 
         await createPost({
             authorId: glamgal.id,
-            title: "FirstPost",
+            title: "ThirdPost",
             content: "Boy i sure do love lorem ipsum."
         });
     } catch (error) {
@@ -122,6 +123,8 @@ async function createInitialTags() {
             '#catmandoeverything',
             '#onesockatatime'
         ]);
+
+        console.log("Tags created, applying them to posts!");
 
         const [postOne, postTwo, postThree] = await getAllPosts();
 
