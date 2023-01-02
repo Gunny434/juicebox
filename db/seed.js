@@ -96,7 +96,7 @@ async function createInitialPosts() {
             authorId: albert.id,
             title: "FirstPost",
             content: "This is my first post. I hope I love writing blogs as much as I love reading them.",
-            tags: ["#happy, #youcandoanything"]
+            tags: ["#happy", "#youcandoanything"]
         });
 
         await createPost({
